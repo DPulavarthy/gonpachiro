@@ -1,2 +1,2 @@
 # gonpachiro
-For a discord bot named Jonin
+This is a test
