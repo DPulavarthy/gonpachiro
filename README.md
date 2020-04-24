@@ -1,2 +1,2 @@
-# gonpachiro
-This is a test
+# Jonin - A Discord Bot
+A multi-purpose bot for a shrine maiden at Yae Village. A bot for GIFs, Weather, Management, Info, osu!, Google searche, and many more features...
