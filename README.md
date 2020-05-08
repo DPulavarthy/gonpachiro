@@ -11,6 +11,7 @@ A multi-purpose bot for a shrine maiden at Yae Village. A bot for GIFs, Weather,
 [![Discord Server](https://discordapp.com/api/guilds/666312150775758853/widget.png)](https://discord.gg/H5PwwSJ)
 [![Twitter](https://img.shields.io/twitter/follow/KurasadHV?style=flat-square)](https://twitter.com/KurasadHV)
 [![Patreon](https://img.shields.io/badge/Donate-Patreon-%23F96854)](https://www.patreon.com/jonin)
+[![donatebot.io](https://img.shields.io/badge/Donate-donatebot.io-%23688ADA)](https://donatebot.io/checkout/666312150775758853)
 
 ![Jonin](https://i.imgur.com/vvZmwmv.png "Hello, I am Jonin, a discord bot made by [HV]Kurasad#2521 and Mayu#2989, I am a multi-purpose bot for a shrine maiden at Yae Village. A bot for GIFs, Weather, Management, Info, osu!, Google searches, and many more features. If you liked Jonin, vote or donate!")
 [![Bots for Discord](https://botsfordiscord.com/api/bot/662517805983334416/widget)](https://botsfordiscord.com/bots/662517805983334416)
