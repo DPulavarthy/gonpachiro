@@ -6,7 +6,7 @@ A multi-purpose bot for a shrine maiden at Yae Village. A bot for GIFs, Weather,
 [![Discord Bots](https://top.gg/api/widget/upvotes/662517805983334416.svg?noavatar=true)](https://top.gg/bot/662517805983334416)
 [![Discord Bots](https://top.gg/api/widget/lib/662517805983334416.svg?noavatar=true)](https://top.gg/bot/662517805983334416)
 [![Discord Bots](https://top.gg/api/widget/owner/662517805983334416.svg?noavatar=true)](https://top.gg/bot/662517805983334416)
-[![[HV]Kurasad#2521](https://img.shields.io/badge/Creator-%5BHV%5DKurasad%232521-%23ff0092)](https://twitter.com/KurasadHV)
+[![Kurasad#2521](https://img.shields.io/badge/Creator-Kurasad%232521-%23ff0092)](https://twitter.com/iKurasad)
 [![Mayu#2989](https://img.shields.io/badge/Co--creator-Mayu%20%232989-%23ff0092)](https://twitter.com/iMayuDev)
 [![Discord Server](https://discordapp.com/api/guilds/666312150775758853/widget.png)](https://discord.gg/H5PwwSJ)
 [![Twitter](https://img.shields.io/twitter/follow/KurasadHV?style=flat-square)](https://twitter.com/KurasadHV)
