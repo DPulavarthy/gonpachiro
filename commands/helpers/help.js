@@ -1,71 +1,34 @@
-const { readdirSync } = require("fs");
-
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let groups = [],
-        field = ``,
-        i = 0;
-
-    readdirSync(`./commands/`).forEach(dir => {
-        groups.push(dir)
-    })
-
-    if (!args.join(" ")) {
-        groups.forEach(group => {
-            field += `${client.arrow} ${client.config.prefix}${module.exports.code.name} ${group}\n`;
-        })
-        const embed = client.send.embed()
-            .setAuthor(`${client.user.username}'s Help list`, client.util.link.logo, client.util.link.support)
-            .setDescription(field)
-        await message.channel.send(embed);
-        return client.send.log(message);
+module.exports.run = async (client, message, args, prefix) => {
+    let groups = [], field = [];
+    client.commands.forEach(command => { if (!groups.includes(command.group)) { groups.push(command.group); }; });
+    if (!args.join(` `)) {
+        groups.forEach(group => { field.push(`${client.arrow} ${prefix}${module.exports.code.title} ${group}`) });
+        message.channel.send(client.embed().setAuthor(`${client.user.username}'s Help list`, client.user.avatarURL({ format: "png", dynamic: true, size: 2048 }), client.util.link.support).setDescription(`${field.join(`\n`)}\n${client.arrow} ${prefix}${module.exports.code.title} full`));
+        return client.log(message);
     } else {
-        let directory;
-        readdirSync(`./commands/`).forEach(async dir => {
-            if (dir.includes(args.join(" ").toLowerCase())) {
-                directory = `./commands/${dir}`;
-            }
-            i++;
-            if (i === groups.length) {
-                if (!directory) {
-                    await message.channel.send(`That group was not found, use \`${client.config.prefix}${module.exports.code.name}\` to get the list of groups`);
-                    return client.send.log(message);
+        switch (args.join(` `).toUpperCase().includes(`FULL`)) {
+            case true:
+                message.channel.send(client.embed().setAuthor(`${client.user.username}'s Full Help list`, client.user.avatarURL({ format: "png", dynamic: true, size: 2048 }), client.util.link.support).setDescription(`${client.user.username}'s full help list can be viewd here: ${client.util.link.commands}.`));
+                client.log(message);
+                break;
+            default:
+                let category, body = [];
+                for await (let group of groups) { if (group.toUpperCase().includes(args.join(` `).toUpperCase())) { category = group; }; };
+                if (category) {
+                    client.commands.forEach(command => { if (command.group === category) { body.push(`${client.arrow} ${client.src.clean(command.code.usage[0], prefix)}`); }; });
+                    message.channel.send(client.embed().setAuthor(`Commands in Group ${category.substring(0, 1).toUpperCase()}${category.substring(1)}`, client.user.avatarURL({ format: "png", dynamic: true, size: 2048 }), client.util.link.support).setDescription(`**\`Use "${prefix}explain [COMMAND]" for more details\`**\n${body.join(`\n`)}`));
+                    return client.log(message);
                 } else {
-                    let loc = directory.lastIndexOf(`/`) + 1;
-                    const embed = client.send.embed()
-                    .setAuthor(`Commands in ${directory.substring(loc, loc + 1).toUpperCase()}${directory.substring(loc + 1)}`, client.util.link.logo, client.util.link.support)
-                    let body = `**\`Use \"${client.config.prefix}explain [COMMAND]\" for more details\`**\n`;
-                    readdirSync(directory).forEach(async file => {
-                        if (file.startsWith(`hiro`)) {
-                            file = `/${file}`
-                        }
-                        file = file.substring(0, file.length - 3)
-                        let loc = directory.lastIndexOf(`/`);
-                        directory = directory.substring(loc + 1, loc + 2).toUpperCase() + directory.substring(loc + 2);
-                        try {
-                            let command = client.commands.get(file).code || client.commands.get(client.aliases.get(file)).code ;
-                            command.usage.forEach(use => {
-                                body += `${client.arrow} ${client.send.clean(use)}\n`;
-                            })
-                        } catch (error) {
-                            client.send.report(message, error);
-                            return client.send.log(message);
-                        }
-                    })
-                    message.channel.send(embed.setDescription(body));
-                    return client.send.log(message);
+                    message.channel.send(client.embed().setAuthor(`Invalid Group`, client.user.avatarURL({ format: "png", dynamic: true, size: 2048 }), client.util.link.support).setDescription(`That command group was not found, use the \`${prefix}${module.exports.code.title}\` command to see the groups.`));
+                    return client.log(message);
                 }
-            }
-        })
+        }
     }
 }
 
 module.exports.code = {
-    name: "help",
-    description: "A list of commands",
-    group: "helpers",
-    usage: ["/PREFIX/help"],
-    accessableby: "Villagers",
-    aliases: ["help", "h", "aid", "commands", "cmds", "cmd"]
+    title: "help",
+    about: "A list of commands",
+    usage: ["%P%help"],
+    alias: ["aid", "commands"]
 }

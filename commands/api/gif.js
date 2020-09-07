@@ -1,38 +1,18 @@
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let loading = await message.channel.send(client.send.loading()),
-        input = args.join(" ");
-
-    if (!input) {
-        await loading.delete();
-        await client.send.input(message, `Input: \`${client.send.clean(module.exports.code.usage[0])}\` -- Returns: \`${client.send.clean(module.exports.code.description)}\``);
-        return client.send.log(message);
-    } else {
-        let { body } = await require(`superagent`).get(`http://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(input)}&api_key=${client.util.api.gif}&limit=100`).catch(error => client.send.report(message, error));
-        if (!body) {
-            await loading.edit(client.send.error(`No GIFs found for ${input}`));
-            return client.send.log(message);
-        }
+module.exports.run = async (client, message, args, prefix) => {
+    let loading = await message.channel.send(client.src.loading());
+    if (!args.join(` `)) { loading.delete(); return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); }
+    else {
+        let { body } = await require(`superagent`).get(`http://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(args.join(` `))}&api_key=${client.key.gif}&limit=50`).catch(error => { loading.delete(); return client.src.report(message, error); });
         let random = body.data[Math.floor(Math.random() * (body.data || 0).length)];
-        if (!random) {
-            await loading.edit(client.send.error(`No GIFs found for ${input}`));
-            return client.send.log(message);
-        }
-        const embed = client.send.embed(`https://giphy.com/`)
-            .setTitle(random.title.toUpperCase())
-            .setURL(random.url)
-            .setImage(random.images.original.url)
-        await loading.edit(embed);
-        return client.send.log(message, random.url);
+        if (!random) { loading.edit(client.src.embed().setTitle(client.src.comment(`GIF not found for ${args.join(` `)}`))); return client.src.log(message); };
+        setTimeout(async () => { loading.edit(client.src.embed(`https://giphy.com/`).setAuthor(random.title.toUpperCase(), ``, random.url).setImage(random.images.original.url)); }, 1000);
+        return client.src.log(message, random.url);
     }
 }
 
 module.exports.code = {
-    name: "gif",
-    description: "A random gif related to [TEXT] (Will be updated to anime only soon!)",
-    group: "api",
-    usage: ["/PREFIX/gif [TEXT]"],
-    accessableby: "Villagers",
-    aliases: ["gif"]
+    title: "gif",
+    about: "A random gif related to [TEXT]",
+    usage: ["%P%gif [TEXT]"],
+    dm: true,
 }

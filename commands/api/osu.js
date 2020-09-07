@@ -1,127 +1,93 @@
-const osu = require('node-osu');
+const osu = require(`node-osu`);
 
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
+module.exports.run = async (client, message, args, prefix) => {
+    const osuApi = new osu.Api(client.key.osu, { notFoundAsError: false, completeScores: false, parseNumeric: false });
+    let loading = await message.channel.send(client.src.loading()), direct;
+    if (args[0]) { direct = args[0].toUpperCase(); };
+    if (!direct || (direct != `U` && direct != `B`) || !args.slice(1).join(` `)) { loading.delete(); return client.src.require(message, module.exports.code.usage[0], module.exports.code.description, `Beatmap ID:`, prefix, `https://i.imgur.com/dyed9No.gif`); };
+    switch (direct) {
+        case `U`:
+            osuApi.getUser({ u: args.slice(1).join(` `) }).then(async user => {
+                try {
+                    let field = [];
+                    field.push(`${client.arrow} Username: ${user.name}`);
+                    field.push(`${client.arrow} User ID: ${user.id}`);
+                    field.push(`${client.arrow} Joined: ${user.raw_joinDate || `N/A`}`);
+                    field.push(`${client.arrow} Accuracy: ${user.accuracy || `N/A`}`);
+                    field.push(`${client.arrow} User lvl: ${user.level || `N/A`}`);
+                    field.push(`${client.arrow} Country: ${user.country || `N/A`}`);
+                    field.push(`${client.arrow} Scores`);
+                    field.push(`${client.blank} Ranked Score: ${user.scores.ranked || `N/A`}`);
+                    field.push(`${client.blank} Total Score: ${user.scores.total || `N/A`}`);
+                    field.push(`${client.arrow} P.P.`);
+                    field.push(`${client.blank} Raw: ${user.pp.raw || `N/A`}`);
+                    field.push(`${client.blank} Rank: ${user.pp.rank || `N/A`}`);
+                    field.push(`${client.blank} Country rank: ${user.pp.countryRank || `N/A`}`);
+                    field.push(`${client.arrow} Total sec. played: ${user.secondsPlayed || `N/A`}`);
+                    setTimeout(async () => { loading.edit(client.embed(`https://osu.ppy.sh/`).setTitle(`Stats for ${user.name}`).setDescription(field.join(`\n`))); }, 1000);
+                    client.log(message);
+                } catch (error) { loading.edit(client.src.comment(`User not found, error: ${error}`)); client.log(message); };
+            })
+            break;
+        case `B`:
+            osuApi.getBeatmaps({ b: args.slice(1).join(` `) }).then(async beatmaps => {
+                try {
+                    let rate = Math.round(parseInt(beatmaps[0].rating) / 2), rating = ``;
+                    for (let i = 0; i < 5; i++) { rating += i <= rate ? client.emojis.cache.get(client.emoji.glow_star).toString() : client.emojis.cache.get(client.emoji.empty_star).toString(); };
+                    let stats = [], data = [], info = [], content = [], other = [];
 
-    const osuApi = new osu.Api(client.util.api.osu, { notFoundAsError: false, completeScores: false, parseNumeric: false });
-    let loading = await message.channel.send(client.send.loading()),
-        direct;
-    if (args[0]) {
-        direct = args[0].toLowerCase();
-    }
-    if (!direct || (direct != `u` && direct != `b`) || !args.slice(1).join(" ")) {
-        await loading.delete();
-        await client.send.input(message, `Input: \`${client.send.clean(module.exports.code.usage[0])}\` -- Returns: \`${client.send.clean(module.exports.code.description)}\``);
-        return client.send.log(message);
-    }
+                    stats.push(`${client.arrow} Max combo: ${beatmaps[0].maxCombo || `N/A`}`);
+                    stats.push(`${client.arrow} Difficulty ${beatmaps[0].difficulty.rating || `N/A`}`);
+                    stats.push(`${client.arrow} Number of plays: ${beatmaps[0].counts.plays || `N/A`}`);
 
-    let input = args.slice(1).join(" ");
-    if (direct === `u`) {
-        osuApi.getUser({ u: input }).then(async user => {
-            try {
-                let player = ``;
-                player += `${client.arrow} Username: ${user.name}\n`;
-                player += `${client.arrow} User ID: ${user.id}\n`;
-                player += `${client.arrow} Joined: ${user.raw_joinDate || `N/A`}\n`;
-                player += `${client.arrow} Accuracy: ${user.accuracy || `N/A`}\n`;
-                player += `${client.arrow} User lvl: ${user.level || `N/A`}\n`;
-                player += `${client.arrow} Country: ${user.country || `N/A`}\n`;
-                player += `${client.arrow} Scores\n`;
-                player += `${client.blank}${client.arrow} Ranked Score: ${user.scores.ranked || `N/A`}\n`;
-                player += `${client.blank}${client.arrow} Total Score: ${user.scores.total || `N/A`}\n`;
-                player += `${client.arrow} P.P.\n`;
-                player += `${client.blank}${client.arrow} Raw: ${user.pp.raw || `N/A`}\n`;
-                player += `${client.blank}${client.arrow} Rank: ${user.pp.rank || `N/A`}\n`;
-                player += `${client.blank}${client.arrow} Country rank: ${user.pp.countryRank || `N/A`}\n`;
-                player += `${client.arrow} Total sec. played: ${user.secondsPlayed || `N/A`}`;
+                    data.push(`${client.arrow} Title: ${beatmaps[0].title}`);
+                    data.push(`${client.arrow} Map ID: ${beatmaps[0].id}`);
+                    data.push(`${client.arrow} Creator: ${beatmaps[0].creator || `N/A`}`);
+                    data.push(`${client.arrow} Version: ${beatmaps[0].version || `N/A`}`);
+                    data.push(`${client.arrow} Map source: ${beatmaps[0].source || `N/A`}`);
+                    data.push(`${client.arrow} Languages: ${beatmaps[0].language || `N/A`}`);
 
-                const embed = client.send.embed(`https://osu.ppy.sh/`)
-                    .setTitle(`Stats for ${user.name}`)
-                    .setDescription(player)
-                await loading.edit(embed);
-                return client.send.log(message);
-            } catch (error) {
-                loading.edit(client.send.error(`User not found, error: ${error}`));
-                return client.send.log(message);
-            }
-        })
-    }
+                    info.push(`${client.arrow} Approval status: ${beatmaps[0].approvalStatus || `N/A`}`);
+                    info.push(`${client.arrow} Submit date: ${beatmaps[0].raw_submitDate || `N/A`}`);
+                    info.push(`${client.arrow} Approved date: ${beatmaps[0].raw_approvedDate || `N/A`}`);
+                    info.push(`${client.arrow} Last update: ${beatmaps[0].raw_lastUpdate || `N/A`}`);
 
-    if (direct === `b`) {
-        osuApi.getBeatmaps({ b: input }).then(async beatmaps => {
-            try {
-                let rate = Math.round(parseInt(beatmaps[0].rating) / 2),
-                    rating = ``;
-                for (let i = 0; i < 5; i++) {
-                    if (i <= rate) {
-                        rating += client.emojis.cache.get(client.util.emoji.glow_star).toString();
-                    } else {
-                        rating += client.emojis.cache.get(client.util.emoji.empty_star).toString();
-                    }
-                }
-                let stats = ``,
-                    data = ``,
-                    info = ``,
-                    content = ``,
-                    other = ``;
+                    content.push(`${client.arrow} Mode: ${beatmaps[0].mode || `N/A`}`);
+                    content.push(`${client.arrow} BPM: ${beatmaps[0].bpm || `N/A`}`);
+                    content.push(`${client.arrow} Rating: ${beatmaps[0].rating}/10`);
+                    content.push(`${client.arrow} Objects`);
+                    content.push(`${client.blank} Normal: ${beatmaps[0].objects.normal || `N/A`}`);
+                    content.push(`${client.blank} Slider: ${beatmaps[0].objects.slider || `N/A`}`);
+                    content.push(`${client.blank} Spinner: ${beatmaps[0].objects.spinner || `N/A`}`);
 
-                stats += `${client.arrow} Max combo: ${beatmaps[0].maxCombo || `N/A`}\n`;
-                stats += `${client.arrow} Difficulty ${beatmaps[0].difficulty.rating || `N/A`}\n`;
-                stats += `${client.arrow} Number of plays: ${beatmaps[0].counts.plays || `N/A`}\n`;
+                    other.push(`${client.arrow} Downloadable: ${beatmaps[0].hasDownload ? `Yes` : `No` || `N/A`}`);
+                    other.push(`${client.arrow} Audio: ${beatmaps[0].hasAudio ? `Yes` : `No` || `N/A`}`);
+                    other.push(`${client.arrow} Difficulty`);
+                    other.push(`${client.blank} Rating: ${beatmaps[0].difficulty.rating || `N/A`}`);
+                    other.push(`${client.blank} Aim: ${beatmaps[0].difficulty.aim || `N/A`}`);
+                    other.push(`${client.blank} Speed: ${beatmaps[0].difficulty.speed || `N/A`}`);
+                    other.push(`${client.blank} Overall: ${beatmaps[0].difficulty.overall || `N/A`}`);
+                    other.push(`${client.blank} Approach: ${beatmaps[0].difficulty.approach || `N/A`}`);
+                    other.push(`${client.blank} Drain: ${beatmaps[0].difficulty.drain || `N/A`}`);
 
-                data += `${client.arrow} Title: ${beatmaps[0].title}\n`;
-                data += `${client.arrow} Map ID: ${beatmaps[0].id}\n`;
-                data += `${client.arrow} Creator: ${beatmaps[0].creator || `N/A`}\n`;
-                data += `${client.arrow} Version: ${beatmaps[0].version || `N/A`}\n`;
-                data += `${client.arrow} Map source: ${beatmaps[0].source || `N/A`}\n`;
-                data += `${client.arrow} Languages: ${beatmaps[0].language || `N/A`}\n`;
-
-                info += `${client.arrow} Approval status: ${beatmaps[0].approvalStatus || `N/A`}\n`;
-                info += `${client.arrow} Submit date: ${beatmaps[0].raw_submitDate || `N/A`}\n`;
-                info += `${client.arrow} Approved date: ${beatmaps[0].raw_approvedDate || `N/A`}\n`;
-                info += `${client.arrow} Last update: ${beatmaps[0].raw_lastUpdate || `N/A`}\n`;
-
-                content += `${client.arrow} Mode: ${beatmaps[0].mode || `N/A`}\n`;
-                content += `${client.arrow} BPM: ${beatmaps[0].bpm || `N/A`}\n`;
-                content += `${client.arrow} Rating: ${beatmaps[0].rating}/10\n`;
-                content += `${client.arrow} Objects\n`;
-                content += `${client.blank}${client.arrow} Normal: ${beatmaps[0].objects.normal || `N/A`}\n`;
-                content += `${client.blank}${client.arrow} Slider: ${beatmaps[0].objects.slider || `N/A`}\n`;
-                content += `${client.blank}${client.arrow} Spinner: ${beatmaps[0].objects.spinner || `N/A`}\n`;
-
-                other += `${client.arrow} Downloadable: ${beatmaps[0].hasDownload ? `Yes` : `No` || `N/A`}\n`;
-                other += `${client.arrow} Audio: ${beatmaps[0].hasAudio ? `Yes` : `No` || `N/A`}\n`;
-                other += `${client.arrow} Difficulty\n`;
-                other += `${client.blank}${client.arrow} Rating: ${beatmaps[0].difficulty.rating || `N/A`}\n`;
-                other += `${client.blank}${client.arrow} Aim: ${beatmaps[0].difficulty.aim || `N/A`}\n`;
-                other += `${client.blank}${client.arrow} Speed: ${beatmaps[0].difficulty.speed || `N/A`}\n`;
-                other += `${client.blank}${client.arrow} Overall: ${beatmaps[0].difficulty.overall || `N/A`}\n`;
-                other += `${client.blank}${client.arrow} Approach: ${beatmaps[0].difficulty.approach || `N/A`}\n`;
-                other += `${client.blank}${client.arrow} Drain: ${beatmaps[0].difficulty.drain || `N/A`}\n`;
-
-                const embed = client.send.embed(`https://osu.ppy.sh/`)
-                    .setTitle(`Information for ${beatmaps[0].title} [${rating}]`)
-                    .addField(`Beatmap Stats`, stats, false)
-                    .addField(`Map Data`, data, false)
-                    .addField(`Map Info`, info, false)
-                    .addField(`Beatmap Content`, content, false)
-                    .addField(`Other Info`, other, false)
-                await loading.edit(embed)
-                return client.send.log(message);
-            } catch (error) {
-                loading.edit(client.send.error(`Beatmap not found, error: ${error}`));
-                return client.send.log(message);
-            }
-        })
+                    const embed = client.embed(`https://osu.ppy.sh/`)
+                        .setTitle(`Information for ${beatmaps[0].title} [${rating}]`)
+                        .addField(`Beatmap Stats`, stats, false)
+                        .addField(`Map Data`, data, false)
+                        .addField(`Map Info`, info, false)
+                        .addField(`Beatmap Content`, content, false)
+                        .addField(`Other Info`, other, false)
+                    setTimeout(async () => { loading.edit(embed); }, 1000);
+                    client.log(message);
+                } catch (error) { loading.edit(client.src.embed().setTitle(client.src.comment(`Beatmap not found, error: ${error}`))); client.log(message); };
+            })
+            break;
     }
 }
 
-
 module.exports.code = {
-    name: "osu",
-    description: "Information for [OSU! BEATMAP OR USER] u = user, b = beatmap",
-    group: "api",
-    usage: ["/PREFIX/osu [u or b] [OSU! BEATMAP OR USER]"],
-    accessableby: "Villagers",
-    aliases: ["osu"]
+    title: "osu",
+    about: "Information for [OSU! BEATMAP OR USER] u = user, b = beatmap",
+    usage: ["%P%osu [u or b] [OSU! BEATMAP OR USER]"],
+    dm: true,
 }

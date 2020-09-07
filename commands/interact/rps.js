@@ -1,16 +1,13 @@
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
+module.exports.run = async (client, message, args, prefix) => {
 
     let input = args[0];
-    if (!input) {
-        await client.send.input(message, `Input: \`${client.send.clean(module.exports.code.usage[0])}\` -- Returns: \`${client.send.clean(module.exports.code.description)}\``);
-        return client.send.log(message);
-    } else {
+    if (!input) { return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); }
+    else {
         react = getNum(input) || parseInt(args[0]);
         let emoji = Math.floor((Math.random() * 3) + 1);
         try {
             if (react === emoji) {
-                const embed = client.send.embed()
+                const embed = client.embed()
                     .setAuthor(`A tie!`, `https://i.imgur.com/Cxihfti.png`, client.util.link.support)
                 if (emoji === 1) {
                     embed.setDescription(`${message.guild.members.cache.get(message.author.id).displayName} - ⛰️\n${client.user.username} - ⛰️`);
@@ -20,19 +17,19 @@ module.exports.run = async (client, message, args) => {
                     embed.setDescription(`${message.guild.members.cache.get(message.author.id).displayName} - ✂️\n${client.user.username} - ✂️`);
                 }
                 message.channel.send(embed);
-                return client.send.log(message);
+                return client.log(message);
             } else {
                 winType(react, emoji);
             }
         } catch (error) {
-            client.send.report(message, error);
-            return client.send.log(message);
+            client.src.report(message, error);
+            return client.log(message);
         }
     }
 
 
     function winType(user, bot) {
-        const embed = client.send.embed()
+        const embed = client.embed()
         if (user === 1 && bot === 2) {
             embed
                 .setAuthor(`Winner: ${client.user.tag}`, client.user.displayAvatarURL(), client.util.link.support)
@@ -59,15 +56,15 @@ module.exports.run = async (client, message, args) => {
                 .setDescription(`${message.guild.members.cache.get(message.author.id).displayName} - ✂️\n${client.user.username} - 📰`);
         } else {
             if (input > 3 || input < 1) {
-                message.channel.send(client.send.error(`Your input must be in the range of 1 to 3`));
-                return client.send.log(message);
+                message.channel.send(client.src.error(`Your input must be in the range of 1 to 3`));
+                return client.log(message);
             } else {
-                message.channel.send(client.send.error(`ERROR: Something went wrong (${client.config.prefix}${client.send.clean(module.exports.code.name)})`));
-                return client.send.log(message);
+                message.channel.send(client.src.error(`ERROR: Something went wrong (${client.config.prefix}${client.src.clean(module.exports.code.name)})`));
+                return client.log(message);
             }
         }
         message.channel.send(embed);
-        return client.send.log(message);
+        return client.log(message);
     }
 
     function getNum(input) {
@@ -84,10 +81,8 @@ module.exports.run = async (client, message, args) => {
 }
 
 module.exports.code = {
-    name: "rps",
-    description: "A game of rps with the bot",
-    group: "interact",
-    usage: ["/PREFIX/rps [(1)(⛰️)(rock) or (2)(📰)(paper) or (3)(✂️)(scissors)]"],
-    accessableby: "Villagers",
-    aliases: ["rps", "rockpaperscissors"]
+    title: "rps",
+    about: "A game of rps with the bot",
+    usage: ["%P%rps [(1)(⛰️)(rock) or (2)(📰)(paper) or (3)(✂️)(scissors)]"],
+    dm: true,
 }

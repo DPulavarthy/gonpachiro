@@ -1,79 +1,37 @@
-const moment = require("moment");
-const momentDurationFormatSetup = require("moment-duration-format");
- 
-momentDurationFormatSetup(moment);
+const moment = require(`moment`);
+require(`moment-duration-format`)(moment);
 
 module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let user;
-    if (!args.join(" ")) {
-        user = message.author;
-    } else {
-        if (args.join(" ") === `owner`) {
-            user = message.guild.owner.user;
-        } else {
-            user = message.mentions.users.first() || await client.send.getUser(args.join(" "));
-        }
-        if (!user) return message.channel.send(`I was unable to get the user's information.`);
-    }
-
-    let type = user.presence.status;
-    if (type === `online`) {
-        type = client.emojis.cache.get(client.util.emoji.green).toString();
-    } else if (type === `idle`) {
-        type = client.emojis.cache.get(client.util.emoji.yellow).toString();
-    } else if (type === `dnd`) {
-        type = client.emojis.cache.get(client.util.emoji.red).toString();
-    } else if (type === `streaming`) {
-        type = client.emojis.cache.get(client.util.emoji.purple).toString();
-    } else if (type === `offline`) {
-        type = client.emojis.cache.get(client.util.emoji.grey).toString();
-    }
-
-    let name = ``,
-        place = ``,
-        description;
+    let status, user = await client.src.userlist(message, args);
+    if (user.length < 1) { message.channel.send(client.src.comment(`That user was not found in ${message.guild.name}`)); return client.log(message); };
+    user = await client.users.cache.get(user[0].id);
+    switch (user.presence.status.toUpperCase()) { case `ONLINE`: status = client.emoji.green; break; case `IDLE`: status = client.emoji.yellow; break; case `DND`: status = client.emoji.red; break; case `STREAMING`: status = client.emoji.purple; break; default: status = client.emoji.grey; };
+    let name = ``, place = ``, description;
     user.presence.activities.forEach(activitiy => {
-        if (activitiy.type === `CUSTOM_STATUS`) {
-            description = activitiy.state;
-        } else {
-            `${client.arrow} Server created:\n`;
-            let time = ` ${moment.duration(new Date().getTime() - new Date(activitiy.timestamps.start).getTime()).format("h [hrs], m [min]")}`
-            name += `${client.arrow} [${activitiy.type.substring(0, 1)}${activitiy.type.substring(1).toLowerCase()} ${activitiy.name}](${activitiy.url}) for ${time || `N/A`}\n`;
+        if (activitiy.type === `CUSTOM_STATUS`) { description = activitiy.state; }
+        else {
+            let time = ``;
+            if (activitiy.timestamps) { time = moment.duration(new Date().getTime() - new Date(activitiy.timestamps.start).getTime()).format(`h [hrs], m [min]`); };
+            name += `${client.arrow} [${activitiy.type.substring(0, 1)}${activitiy.type.substring(1).toLowerCase()} ${activitiy.name}](${activitiy.url})${time !== `` ? ` for ${time}` : ``}\n`;
         }
     })
     if (!user.bot && user.presence.status !== `offline`) {
-        if (user.presence.clientStatus.web) {
-            place += `${client.arrow}Website\n`
-        }
-        if (user.presence.clientStatus.desktop) {
-            place += `${client.arrow}Desktop\n`
-        }
-        if (user.presence.clientStatus.mobile) {
-            place += `${client.arrow}Mobile\n`
-        }
-    } else if (user.bot) {
-        place = `${client.arrow}Bot\n`;
-    } else {
-        place = `${client.arrow}Not Active\n`;
-    }
-    const embed = client.send.embed()
-        .setTitle(`${type} ${user.tag}`)
+        if (user.presence.clientStatus.web) { place += `${client.arrow}Website\n` };
+        if (user.presence.clientStatus.desktop) { place += `${client.arrow}Desktop\n` };
+        if (user.presence.clientStatus.mobile) { place += `${client.arrow}Mobile\n` };
+    } else if (user.bot) { place = `${client.arrow}Bot\n`; } else { place = `Not Active\n`; }
+    const embed = client.embed()
+        .setTitle(`${client.emojis.cache.get(status).toString()} ${user.tag}`)
         .addField(`Activities`, name || `Not active`, false)
         .addField(`Active on`, place || `Not active`, false)
-    if (description) {
-        embed.setDescription(description);
-    }
-    await message.channel.send(embed);
-    return client.send.log(message);
+    if (description) { embed.setDescription(description); };
+    message.channel.send(embed);
+    return client.log(message);
 }
 
 module.exports.code = {
-    name: "presence",
-    description: "Get the Discord Rich Presence info of [USER] / Author",
-    group: "information",
-    usage: ["/PREFIX/presence [USER]", "/PREFIX/presence"],
-    accessableby: "Villagers",
-    aliases: ["presence", "rp", "richpresence"]
+    title: "presence",
+    about: "Get the Discord Rich Presence info of (USER)",
+    usage: ["%P%presence [USER]"],
+    alias: ["rp"]
 }

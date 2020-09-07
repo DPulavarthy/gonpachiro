@@ -1,71 +1,18 @@
 module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let loading = await message.channel.send(client.send.loading()),
-        codes = [
-            `Author permission / Author role error`,
-            `Client permission / Client role error`,
-            `Connection error`,
-            `Command disabled`,
-            `Command error`,
-            `Channel error/command invalid in channel`,
-            `Invalid input / Invalid command`,
-            `Code error - Report to support [here](` + client.util.link.support + `)`,
-            `Member error / Member does not exist`,
-            `Channel does not exist`,
-            `Channel already exists`,
-            `User/member not mentioned`,
-            `Role not mentioned`,
-            `DEV ONLY`,
-            `Role already given`,
-            `OWNER ONLY`
-        ];
-
-    if (!args.join(" ") || args.join(" ").toLowerCase() === `all`) {
-        await loading.edit(errcodes()).catch(error => { loading.delete(); client.send.report(message, error); });
-        return client.send.log(message);
+    if (!args.join(` `) || args.join(` `).toLowerCase() === `all`) {
+        let i = 1, field = [];
+        client.error.code.forEach(err => { field.push(`**\`Code ${i}.)\`** ${err}`); i++; });
+        await message.channel.send(client.embed().setDescription(field.join(`\n`)));
+        return client.log(message);
     }
-    let code = parseInt(args.join(" "));
-    if (code) {
-        await loading.edit(getCode(code)).catch(error => { loading.delete(); client.send.report(message, error); });
-        return client.send.log(message);
-    } else {
-        await loading.edit(getCode(`Invalid`)).catch(error => { loading.delete(); client.send.report(message, error); });
-        return client.send.log(message);
-    }
-
-    function errcodes() {
-        const embed = client.send.embed().setTitle(message.guild.members.cache.get(message.author.id).displayName + `,`)
-        for (let i = 0; i < codes.length; i++) {
-            embed.addField(`Code ` + (i + 1), codes[i], true)
-        }
-        return embed;
-    }
-
-    function getCode(code) {
-        try {
-            if (code === `Invalid` || !codes[code - 1]) {
-                const embed = client.send.embed().setTitle(message.guild.members.cache.get(message.author.id).displayName + `,`)
-                embed.addField(`Invalid Code`, `Codes only go from 1 to ${codes.length}`, true)
-                return embed;
-            } else {
-                const embed = client.send.embed().setTitle(message.guild.members.cache.get(message.author.id).displayName + `,`)
-                embed.addField(`Code ` + code, codes[code - 1], true)
-                return embed;
-            }
-        } catch (error) {
-            const embed = client.send.embed().setTitle(message.guild.members.cache.get(message.author.id).displayName + `,`)
-            embed.addField(`Invalid Code`, `Codes only go from 1 to ${codes.length}`, true)
-            return embed;
-        }
-    }
+    let code = client.error.code.get(Math.floor(parseInt(args.join(` `))));
+    if (code) { message.channel.send(client.embed().addField(`Code ${Math.floor(parseInt(args.join(` `)))}`, code)); return client.log(message); }
+    else { await message.channel.send(client.embed().addField(`Invalid Code`, `Codes only go from 1 to ${client.error.code.size}`, true)); return client.log(message); };
 }
 
 module.exports.code = {
-    name: "errcodes",
-    description: "Error types for /BOT/",
-    group: "helpers",
-    usage: ["/PREFIX/errcodes (ERROR CODE)"],
-    accessableby: "Members",
-    aliases: ["err", "errcodes", "errcode", "errorcode", "errorcodes"]
+    title: "errcodes",
+    about: "Error types for %B%",
+    usage: ["%P%errcodes (ERROR CODE)"],
+    alias: ["err"]
 }

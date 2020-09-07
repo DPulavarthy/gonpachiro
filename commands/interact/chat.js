@@ -1,29 +1,16 @@
-const { get } = require("superagent")
-
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
+module.exports.run = async (client, message, args, prefix) => {
     message.channel.startTyping(true);
-    if (!args) {
-        message.channel.stopTyping(true);
-        client.send.input(message, `Input: \`${client.send.clean(module.exports.code.usage[0])}\` -- Returns: \`${client.send.clean(module.exports.code.description)}\``);
-        client.send.log(message);
-    } else {
-        let res = await get(`https://some-random-api.ml/chatbot?message=${encodeURIComponent(args.join(" "))}`).catch(() => null);
-        if (!res) return message.reply(`Unable to fetch the response`);
-        if (!res.body) return message.reply(`Unable to fetch the response..`);
-        let output = await res.body.response;
-        message.channel.send(output);
-        await message.channel.stopTyping(true);
-        client.send.log(message);
-    }
+    let alexa = require(`alexa-bot-api`);
+    let ai = new alexa(client.key.alexa);
+    if (!args.join(` `)) { message.channel.stopTyping(true); return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); }
+    ai.getReply(args.join(` `)).then(reply => { message.channel.send(reply); return client.log(message); });
+    message.channel.stopTyping(true);
 }
 
 module.exports.code = {
-    name: "chat",
-    description: "/BOT/ as a chatbot",
-    group: "interact",
-    usage: ["/PREFIX/chat [TEXT]"],
-    accessableby: "Villagers",
-    aliases: ["chat", "j"]
+    title: "chat",
+    about: "%B% as a chatbot",
+    usage: ["%P%chat [TEXT]"],
+    alias: ["j"],
+    dm: true,
 }

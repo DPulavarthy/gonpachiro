@@ -1,49 +1,26 @@
-const { readdirSync } = require("fs");
+let Discord = require(`discord.js`);
 
-module.exports = async (client) => {
-    let count = 0,
-        approved = 0,
-        broken = ``,
-        lines = 0,
-        cmds = 0;
-    readdirSync(`./`).forEach(file => {
-        let filepath = `./${file}`
-        if (file.endsWith(`.js`)) {
-            lines += client.send.lines(filepath);
-        }
-    })
-    lines += client.send.lines(`./${require(`../package.json`).main}`);
-    lines += client.send.lines(`./send.js`);
-    lines += client.send.lines(`./util.js`);
-    console.log(`Loading commands!`);
-    readdirSync("./commands/").forEach(async dir => {
-        const commands = readdirSync(`./commands/${dir}/`).filter(file => file.split(".").pop() === "js");
-
+module.exports = async (client) => { // Command Handler
+    let count = 0, approved = 0, lines = 0, length = 0, broken = [], groups = [];
+    console.log(`[SYSTEM]: Loading Resources!`.brightGreen);
+    for (let main of [`./resources/`, `./handler/`, `./`]) { for (let file of require(`fs`).readdirSync(main).filter(file => file.split(`.`).pop() === `js`)) { require(`fs`).readFile(`${main}${file}`, `utf8`, function (error, code) { if (error) { client.error(error); } length += code.length; lines += countlines(code); }); }; };
+    console.log(`[SYSTEM]: Successfully Loaded Resources!`.brightGreen);
+    console.log(`[SYSTEM]: Loading Commands!`.brightGreen);
+    require(`fs`).readdirSync(`./commands/`).forEach(async dir => {
+        const commands = require(`fs`).readdirSync(`./commands/${dir}/`).filter(file => file.split(`.`).pop() === `js`);
         for (let file of commands) {
             let pull = require(`../commands/${dir}/${file}`);
-            let filepath = `./commands/${dir}/${file}`;
-            if (pull.code.name) {
-                client.commands.set(pull.code.name, pull);
-                pull.code.aliases.forEach(alias => {
-                    client.aliases.set(alias, pull.code.name);
-                });
-                count++;
-                approved++;
-            }
-            else {
-                count++;
-                broken += file + `, `;
-                continue;
-            }
-                lines += client.send.lines(filepath);
-            if (pull.aliases && Array.isArray(pull.aliases)) pull.aliases.forEach(alias => client.aliases.set(alias, pull.name));
+            require(`fs`).readFile(`./commands/${dir}/${file}`, `utf8`, function (error, code) { if (error) { client.error(error); } length += code.length; lines += countlines(code); });
+            if (pull.code && pull.code.title) {
+                client.cooldowns.set(pull.code.title, new Discord.Collection());
+                client.commands.set(pull.code.title, { run: pull.run, code: pull.code, group: dir });
+                if (pull.code.alias && pull.code.alias.length > 0) { pull.code.alias.forEach(alias => { client.aliases.set(alias, pull.code.title); }); };
+                count++; approved++;
+            } else { count++; broken.push(file); continue; };
         }
+        groups.push(dir);
     });
-    client.send.setCMD(count)
-    client.send.setLines(lines + count);
-    if (broken) {
-        console.log(`Successfully loaded ${approved}/${count} commands, failed to load: ${broken.substring(0, broken.length - 2)}`);
-    } else {
-        console.log(`Successfully loaded ${approved}/${count} commands`);
-    }
+    setTimeout(function () { client.lines = lines; client.length = length; client.groups = groups; }, 1000); // Lines of code as well as number of characters
+    console.log(`${`[SYSTEM]: Successfully Loaded ${approved}/${count} Commands!`.brightGreen}${broken.length > 0 ? `\n[ERROR!]: Failed To Load: ${broken.join(`, `)}`.red : ``}`);
+    function countlines(input) { let stats = require('sloc')(input, `js`); return stats[`total`]; };
 }

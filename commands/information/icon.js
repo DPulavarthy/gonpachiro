@@ -1,20 +1,14 @@
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let loading = await message.channel.send(client.send.loading());
-    const embed = client.send.embed()
+module.exports.run = async (client, message) => {
+    const embed = client.embed()
         .setTitle(message.guild.name)
-        .setDescription(`[PNG](${message.guild.iconURL({ format: "png", dynamic: true, size: 2048 })}) **|** [JPG](${message.guild.iconURL({ format: "jpg", dynamic: true, size: 2048 })}) **|** [JPEG](${message.guild.iconURL({ format: "jpeg", dynamic: true, size: 2048 })}) **|** [WEBP](${message.guild.iconURL({ format: "webp", dynamic: true, size: 2048 })})`)
+        .setDescription(message.guild.iconURL().toLowerCase().substring(message.guild.iconURL().lastIndexOf(`/`) + 1, message.guild.iconURL().lastIndexOf(`/`) + 3) === `a_` ? `[GIF](${message.guild.iconURL({ format: "gif", dynamic: true, size: 2048 })}) **|** [WEBP](${message.guild.iconURL({ size: 2048 })})` : `[PNG](${message.guild.iconURL({ format: "png", dynamic: true, size: 2048 })}) **|** [JPG](${message.guild.iconURL({ format: "jpg", dynamic: true, size: 2048 })}) **|** [JPEG](${message.guild.iconURL({ format: "jpeg", dynamic: true, size: 2048 })}) **|** [WEBP](${message.guild.iconURL({ format: "webp", dynamic: true, size: 2048 })})`)
         .setImage(message.guild.iconURL({ format: "png", dynamic: true, size: 2048 }))
-    await loading.edit(embed);
-    return client.send.log(message);
+    message.channel.send(embed);
+    return client.log(message);
 }
 
 module.exports.code = {
-    name: "icon",
-    description: "Get the server icon",
-    group: "information",
-    usage: ["/PREFIX/icon"],
-    accessableby: "Villagers",
-    aliases: ["icon"]
+    title: "icon",
+    about: "Get the server icon",
+    usage: ["%P%icon"],
 }

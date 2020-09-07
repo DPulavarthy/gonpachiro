@@ -1,76 +1,16 @@
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let loading = await message.channel.send(client.send.loading()),
-        code = args.join(" ");
-    const embed = client.send.embed();
-    if (!client.send.approve(message.author.id, `OWNER`)) {
-        client.send.restrict(message, 16);
-        return client.send.log(message, `hiro`);
-    }
-
-    if (!code) {
-        loading.delete()
-        client.send.input(message, `Input: \`${module.exports.code.usage[0]}\` -- Returns: \`${module.exports.code.description}\``);
-        return client.send.log(message);
-    }
-
-    if (code.toLowerCase().includes(`api`) || code.toLowerCase().includes(`config`)) {
-        embed
-            .addField(`📥 Input`, `\`\`\`\n${code}\n\`\`\``)
-            .addField(`📤 Output`, `\`\`\`xl\nERROR: You do not want to do this!\nA word has triggered the eval command to terminate!\n\`\`\``)
-            .addField(`Status`, `${client.emojis.cache.get(client.util.emoji.red).toString()} - Failed`);
-        await loading.edit(embed).catch(error => client.send.report(message, error));
-        return client.send.log(message, `hiro`);
-    }
-
-    try {
-        let evaled = clean(await eval(code)),
-            output;
-        if (evaled.constructor.name === `Promise`) {
-            output = `📤 Output (Promise)`;
-        } else {
-            output = `📤 Output`;
-        }
-        if (evaled.length > 800) {
-            evaled = evaled.substring(0, 800) + `...`;
-        }
-        embed
-            .addField(`📥 Input`, `\`\`\`\n${code}\n\`\`\``)
-            .addField(output, `\`\`\`xl\n${evaled}\n\`\`\``)
-            .addField(`Status`, `${client.emojis.cache.get(client.util.emoji.green).toString()} - Success`);
-        await loading.edit(embed).catch(error => send.report(message, error));
-        return client.send.log(message, `hiro`);
-    }
-    catch (err) {
-        console.log(err)
-        embed
-            .addField(`📥 Input`, `\`\`\`\n${code}\n\`\`\``)
-            .addField(`📤 Output`, `\`\`\`xl\n${err.stack}\n\`\`\``)
-            .addField(`Status`, `${client.emojis.cache.get(client.util.emoji.red).toString()} - Failed`);
-        await loading.edit(embed).catch(error => client.send.report(message, error));
-        return client.send.log(message, `hiro`);
-    }
-
-
-
-    function clean(text) {
-        if (typeof text !== `string`)
-            text = require(`util`).inspect(text, { depth: 0 })
-        let rege = new RegExp(client.config.token, "gi");
-        text = text
-            .replace(/`/g, `\`` + String.fromCharCode(8203))
-            .replace(/@/g, `@` + String.fromCharCode(8203))
-            .replace(rege, `For security reasons I cannot show this.`)
-        return text;
-    }
+module.exports.run = async (client, message, args, prefix) => {
+    let loading = await message.channel.send(client.src.loading()), code = args.join(` `);
+    if (!args.join(` `)) { loading.delete(); return client.src.require(message, module.exports.code.usage[0], module.exports.code.about); };
+    for (let word of [`api`, `env`, `key`, `token`]) { if (args.join(` `).includes(`.${word}`)) { return result(`ERROR: You do not want to do this!\nA word has triggered the eval command to terminate!`, false, `xl`); }; };
+    try { let evaled = clean(await eval(code)); if (evaled.length > (1900 - args.join(` `).length)) { evaled = `${evaled.substring(0, (1900 - args.join(` `).length))}...`; }; return result(evaled, true); } catch (error) { client.src.error(error); return result(error); };
+    function result(output, status, format) { setTimeout(function () { loading.edit(client.embed().setDescription(`**${client.emojis.cache.get(client.emoji.input)} Input**\n${client.src.code(args.join(` `))}\n**${client.emojis.cache.get(client.emoji.output)} Output**\n${client.src.code(output, format || `js`)}`).addField(`Status`, status ? `${client.emojis.cache.get(client.emoji.green).toString()} - Success` : `${client.emojis.cache.get(client.emoji.red).toString()} - Failed`)); }, 1000); return client.log(message, `hiro`); };
+    function clean(text) { if (typeof text !== `string`) { text = require(`util`).inspect(text, { depth: 0 }); }; return text.replace(/`/g, `\`` + String.fromCharCode(8203)).replace(/@/g, `@` + String.fromCharCode(8203)).replace(new RegExp(process.env.TOKEN, "gi"), `[DENIED]`); };
 }
 
 module.exports.code = {
-    name: "eval",
-    description: "Evaluates [CODE]",
-    group: "owner",
-    usage: ["/PREFIX/eval [CODE]"],
-    accessableby: "Owner",
-    aliases: ["eval", "evaluate"]
+    title: "eval",
+    about: "Evaluates [CODE]",
+    usage: ["%P%eval [CODE]"],
+    ranks: 8,
+    dm: true,
 }

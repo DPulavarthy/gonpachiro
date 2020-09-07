@@ -1,72 +1,38 @@
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    const user = message.mentions.users.first();
-
-    if (!user) {
-        await client.send.input(message, `Input: \`${client.send.clean(module.exports.code.usage[0])}\` -- Returns: \`${client.send.clean(module.exports.code.description)}\``);
-        return client.send.log(message);
-    }
-
-    const member = message.guild.member(user);
-
-    if (!member) {
-        client.send.missing(message, `Mentioned a user not in the server`, `09`);
-        return client.send.log(message);
-    }
-
-    if (!message.guild.members.cache.get(message.author.id).hasPermission(`KICK_MEMBERS`)) {
-        client.send.perms(message, `KICK_MEMBERS`, `01`);
-        return client.send.log(message);
-    }
-
-    if (user.id === message.guild.owner.id) {
-        client.send.missing(message, `Cannot kick server owner`, `07`);
-        return client.send.log(message);
-    }
-
-    if (!member.kickable) {
-        client.send.missing(message, `Member cannot be kicked\n(Make sure ${client.user.username}'s role is higher than the one you want to kick)`, `02`);
-        return client.send.log(message);
-    }
-
-    if (user.id === message.author.id) {
-        client.send.missing(message, `You cannot kick yourself`, `07`);
-        return client.send.log(message);
-    }
-
+module.exports.run = async (client, message, args, prefix) => {
+    let user = message.mentions.users.first();
+    if (!user) { return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); }
+    let member = message.guild.members.cache.get(user.id);
+    if (!member) { return client.src.require(message, `Mentioned a user not in the server`, `09`); };
+    if (!message.guild.members.cache.get(message.author.id).hasPermission(`KICK_MEMBERS`)) { return client.src.require(message, `You do not have the following permission: KICK_MEMBERS`, `01`); };
+    if (!message.guild.members.cache.get(client.user.id).hasPermission(`KICK_MEMBERS`)) { return client.src.require(message, `I do not have the following permission: KICK_MEMBERS`, `01`); };
+    if (!user.id === message.guild.owner.id) { return client.src.require(message, `Cannot kick server owner`, `07`); };
+    if (!member.kickable) { return client.src.require(message, `Member cannot be kicked\n(Make sure ${client.user.username}'s role is higher than the one you want to kick)`, `02`); };
+    if (user.id === message.author.id) { return client.src.require(message, `You cannot kick yourself`, `07`); };
+    let field = [], reason = args.slice(1).join(` `);
+    field.push(`${client.arrow} Username: ${user.tag}`);
+    field.push(`${client.arrow} ID: ${user.id}`);
+    field.push(`${client.arrow} Triggered by: ${message.author.tag}`);
+    field.push(`${client.arrow} Triggered ID: ${message.author.id}`);
+    field.push(`${client.arrow} Server Name: ${message.guild.name}`);
+    field.push(`${client.arrow} Server ID: ${message.guild.id}`);
+    field.push(`${client.arrow} Reason: ${reason || `N/A`}`);
     try {
         member.kick().then(async () => {
-            let reason = args.slice(1).join(" "),
-                field = ``;
-            if (!reason) {
-                reason = `No reason provided`;
-            }
-            field += `${client.arrow} Username: ${user.tag}\n`;
-            field += `${client.arrow} ID: ${user.id}\n`;
-            field += `${client.arrow} Triggered by: ${message.author.tag}\n`;
-            field += `${client.arrow} Triggered ID: ${message.author.id}\n`;
-            field += `${client.arrow} Server Name: ${message.guild.name}\n`;
-            field += `${client.arrow} Server ID: ${message.guild.id}\n`;
-            field += `${client.arrow} Reason: ${reason}\n`;
-            const embed = client.send.embed()
-                .setTitle(`User Kicked!`)
-                .setDescription(field)
-            await message.channel.send(embed)
-            await client.users.cache.get(user.id).send(embed.setTitle(`You have been kicked!`));
-            return client.send.log(message);
+            let dm = true;
+            try { await client.users.cache.get(user.id).send(client.embed().setTitle(`You have been Kicked!`).setDescription(field)); }
+            catch (error) { dm = false; }
+            await message.channel.send(client.embed().setTitle(`User Kick Successful`).setDescription(`${field.join(`\n`)}\n${client.arrow} Notified User: ${dm ? `Yes` : `No`}`));
+            return client.log(message);
         });
     } catch (error) {
-        client.send.report(message, error);
-        return client.send.log(message);
+        client.error(error);
+        await message.channel.send(client.embed().setTitle(`User Kick Failed`).setDescription(`${field.join(`\n`)}\n${client.arrow} Error: ${error}`));
+        return client.log(message);
     }
 }
 
 module.exports.code = {
-    name: "kick",
-    description: "kicks [USER] from guild",
-    group: "moderation",
-    usage: ["/PREFIX/kick [USER] (REASON)"],
-    accessableby: "Villagers with KICK_MEMBERS permission",
-    aliases: ["kick"]
+    title: "kick",
+    about: "Kicks [USER] from guild",
+    usage: ["%P%kick [USER] (REASON)"],
 }

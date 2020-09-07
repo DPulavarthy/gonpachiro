@@ -1,25 +1,23 @@
-module.exports.run = async (client, message) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    let word = message.content.substring(2, 6).toLowerCase();
-    if (word === `ping`) {
-        word = client.emojis.cache.get(client.util.emoji.ping).toString() + ` Pong!`;
-    } else if (word === `beep`) {
-        word = client.emojis.cache.get(client.util.emoji.beep).toString() + ` Boop!`;
-    } else if (word === `ding`) {
-        word = client.emojis.cache.get(client.util.emoji.ding).toString() + ` Dong!`;
-    }
-
-    const msg = await message.channel.send(`Testing...`);
-    await msg.edit(`${word}\nLatency is ${msg.createdTimestamp - message.createdTimestamp}ms\nAPI Latency is ${Math.round(client.ws.ping)}ms`);
-    return client.send.log(message);
+module.exports.run = async (client, message, args, prefix) => {
+    let word, Discord = require(`discord.js`), loading = await message.channel.send(client.src.loading()), load = loading.createdTimestamp - message.createdTimestamp;
+    switch (message.content.split(` `)[0].slice(prefix.length).toLowerCase()) { case `ding`: word = `🛎️ Dong!`; break; case `beep`: word = `🐉 Boop!`; break; default: word = `🏓 Pong!` };
+    // client.database.data.findOne({ case: module.exports.code.title }, async (error, result) => {
+    // if (error) { client.error(error); };
+    // if (!result) { result = await client.src.db(message, module.exports.code.title); };
+    // result.data.push(load);
+    // await client.chart(module.exports.code.title, result.data, [`ms`, `minutes`]);
+    await loading.delete();
+    message.channel.send(client.embed().setDescription(`${client.src.code(word)}${client.src.code(`Latency is ${load} ms\nAPI Latency is ${Math.round(client.ws.ping)} ms\nServer Latency is ${message.channel.type === `dm` ? `not avaliable in DMs` : `${Math.round(message.guild.shard.ping)} ms`}`, `js`)}`));
+    // message.channel.send({ files: [new Discord.MessageAttachment(`./resources/chart.png`) || null], embed: client.embed().setDescription(`${client.src.code(word)}${client.src.code(`Latency is ${load} ms\nAPI Latency is ${Math.round(client.ws.ping)} ms\nServer Latency is ${message.channel.type === `dm` ? `not avaliable in DMs` : `${Math.round(message.guild.shard.ping)} ms`}`, `js`)}`).setImage(`attachment://chart.png`) });
+    // setTimeout(async () => { require(`fs`).unlinkSync(`./resources/chart.png`); }, 1000);
+    return client.log(message);
+    // });
 }
 
 module.exports.code = {
-    name: "ping",
-    description: " Latency + API Latency",
-    group: "information",
-    usage: ["/PREFIX/ping", "/PREFIX/beep", "/PREFIX/ding"],
-    accessableby: "Villagers",
-    aliases: ["ping", "beep", "ding"]
+    title: "ping",
+    about: "Latency + API Latency + Server Latency",
+    usage: ["%P%ping", "%P%beep", "%P%ding"],
+    alias: ["beep", "ding"],
+    dm: true,
 }

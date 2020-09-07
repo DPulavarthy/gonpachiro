@@ -1,114 +1,29 @@
-let package = require(`../../package.json`);
-const { readdirSync } = require("fs");
-
-module.exports.run = async (client, message, args) => {
-    if (client.send.status(module.exports.code.name)) { return client.send.disabled(message); }
-
-    if (!client.send.approve(message.author.id, `APPROVED`)) {
-        client.send.restrict(message, 14);
-        return client.send.log(message, `hiro`);
-    } else {
-        let input = args.join(" ");
-        if (input) {
-            let loc = input.lastIndexOf(`.`);
-            if (loc) {
-                let check = input.substring(loc + 1);
-                if (check === `js` || check === `json`) {
-                    input = input.substring(0, loc);
-                }
-            }
-            let folder;
-            try {
-                let groups = [];
-                readdirSync(`./commands/`).forEach(file => {
-                    groups.push(file);
-                })
-                if (input === `main`) {
-                    folder = readdirSync(`./`);
-                } else if (input === `commands` || input === `cmds`) {
-                    folder = readdirSync(`./commands/`);
-                } else if (groups && groups.includes(input)) {
-                    folder = readdirSync(`./commands/${input}/`);
-                } else {
-                    folder = false;
-                }
-            } catch (error) {
-                console.log(error)
-            }
-            if (folder) {
-                let names = ``,
-                    i = 0;
-                folder.forEach(file => {
-                    i++;
-                    names += `\`${i}.)\` ${file}\n`;
-                })
-                if (!names) {
-                    names = `No files found`
-                }
-                await message.channel.send(names);
-                return client.send.log(message);
-            }
-            let command;
-            try {
-                let main = await mainDIR(input);
-                if (main) {
-                    await message.channel.send(main);
-                    return client.send.log(message, `hiro`);
-                } else {
-                    command = client.commands.get(client.aliases.get(input)).code || client.commands.get(input).code;
-                }
-            } catch (error) {
-                await message.channel.send(`No command found: ${error}`);
-                return client.send.log(message, `hiro`);
-            }
-            if (command) {
-                let name = command.name;
-                if (name.startsWith(`/`)) {
-                    name = name.substring(1);
-                }
-                message.channel.send(`The directory for \`${args.join(" ")}\` is: \`./commands/${command.group || "No Group"}/${name}.js\``);
-                return client.send.log(message, `hiro`);
-            } else {
-                await message.channel.send(`No command found for: ${args.join(" ")}`);
-                return client.send.log(message, `hiro`);
-            }
-        } else {
-            await message.channel.send(`No input provided`);
-            return client.send.log(message, `hiro`);
-        }
-    }
-
-    async function mainDIR(input) {
-        let js = [],
-            json = [],
-            main = [package.main.substring(0, package.main.length - 3), `index`],
-            handler = [`command`];
-        readdirSync(`./`).forEach(file => {
-            if (file.endsWith(`.js`)) {
-                js.push(file.substring(0, file.length - 3));
-            } else if (file.endsWith(`.json`)) {
-                json.push(file.substring(0, file.length - 5))
-            }
-        })
-        if (js.includes(input)) {
-            return `The directory for \`${args.join(" ")}\` is: \`./${input}.js\``;
-        } else if (json.includes(input)) {
-            return `The directory for \`${args.join(" ")}\` is: \`./${input}.json\``
-        } else if (handler.includes(input)) {
-            return `The directory for \`${args.join(" ")}\` is: \`./handler/${input}.js\``
-        } else if (main.includes(input)) {
-            return `The directory for \`${args.join(" ")}\` is: \`./${package.main}\``
-        } else {
-            return false;
-        }
-    }
+module.exports.run = async (client, message, args, prefix) => {
+    if (!args.join(` `)) { loading.delete(); return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); };
+    let input = args.join(` `).toLowerCase(), package = require(`../../package.json`);
+    if (input.startsWith(client.prefix) || input.startsWith(prefix)) { input = input.substring(2); };
+    let command = client.commands.get(client.aliases.get(input)) || client.commands.get(input) || client.commands.get(client.aliases.get(`/${input}`)) || client.commands.get(`/${input}`);
+    if (command) { embed(`./commands/${command.group}/${command.code.title.startsWith(`/`) ? command.code.title.substring(1) : command.code.title}.js`); return client.log(message); }
+    else {
+        const resources = require(`fs`).readdirSync(`./resources`).filter(file => file.split(`.`).pop() === `js`);
+        if (resources.includes(`${input}.js`)) { embed(`./resources/${input}.js`); return client.log(message); }
+        else if (input === `command`) { embed(`./handler/command.js`); return client.log(message); }
+        else if ([package.main.substring(0, package.main.length - 3), `index`].includes(input)) { embed(`./${package.main}`); return client.log(message); }
+        else {
+            let groups = [], field = [], i = 1;
+            client.commands.forEach(command => { if (!groups.includes(command.group)) { groups.push(command.group); }; });
+            if (groups.includes(input)) { client.commands.forEach(command => { if (command.group === input) { field.push(`\`${i}.)\` ${command.code.title.startsWith(`/`) ? command.code.title.substring(1) : command.code.title}.js`); i++; }; }); message.channel.send(client.embed().setAuthor(`Commands in the ${input} group`).setDescription(field.join(`\n`))); return client.log(message); }
+            else { message.channel.send(client.src.comment(`ERROR: That JS file was not found in any directory.`)); return client.log(message); };
+        };
+    };
+    function embed(dir) { return message.channel.send(client.embed().setAuthor(`The directory for \`${args.join(` `)}\` is`).setTitle(`**\`${dir}\`**`)); };
 }
 
 module.exports.code = {
-    name: "directory",
-    description: "Get the directoy of a file/command",
-    group: "devs",
-    usage: ["/PREFIX/directory [COMMAND/FILE]"],
-    accessableby: "Gonpachiro",
-    aliases: ["directory", "direct", "dir"]
+    title: "directory",
+    about: "Get the directoy of a file/command",
+    usage: ["%P%directory [COMMAND/FILE]"],
+    alias: ["dir"],
+    ranks: 7,
+    dm: true,
 }

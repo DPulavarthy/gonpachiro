@@ -1,39 +1,45 @@
 {
   "name": "jonin",
-  "version": "3.00.00",
-  "description": "A multi-purpose bot for a shrine maiden at Yae Village",
+  "version": "4.0.0",
+  "description": "A multi-purpose bot for a shrine maiden at Yae Village.",
   "main": "jonin.js",
   "scripts": {
-    "start": "node jonin.js"
+    "start": "node jonin.js",
+    "test": "jonin.js"
   },
-  "author": "[HV]Kurasad#2521",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DPulavarthy/gonpachiro"
+  },
+  "keywords": [
+    "jonin"
+  ],
+  "author": "Kurasad#2521",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.1.0",
-    "bad-words": "^3.0.3",
+    "alexa-bot-api": "^0.1.2",
+    "canvas": "^2.6.1",
+    "colors": "^1.4.0",
     "country-code-lookup": "0.0.17",
+    "cron": "^1.8.2",
     "danbooru": "^3.1.0",
-    "dbl-api": "^1.2.1",
     "dblapi.js": "^2.4.0",
+    "decode-encode-binary": "^1.4.13",
     "discord.js": "^12.2.0",
-    "fs": "0.0.1-security",
-    "imdb-api": "^4.0.3",
-    "moment": "^2.24.0",
+    "dotenv": "^8.2.0",
+    "google-spreadsheet": "^3.0.11",
+    "moment": "^2.26.0",
     "moment-duration-format": "^2.3.2",
-    "ms": "^2.1.2",
-    "nekos.life": "^2.0.6",
-    "nicejob": "^1.0.1",
+    "mongodb": "^3.5.9",
+    "nekos.life": "^2.0.7",
     "node-osu": "^2.2.0",
-    "owoify-js": "^1.0.7",
-    "pokedex": "^1.1.0",
-    "simple-youtube-api": "^5.2.1",
-    "string-similarity-js": "^2.1.2",
+    "ping": "^0.2.3",
+    "sloc": "^0.2.1",
+    "statcord.js": "^2.2.3",
     "superagent": "^5.2.2",
+    "systeminformation": "^4.26.10",
     "urban": "^0.3.2",
-    "weather-js": "^2.0.0",
-    "ytdl-core": "^2.1.0",
-    "ytdl-core-discord": "^1.2.0"
+    "weather-js": "^2.0.0"
   },
-  "devDependencies": {},
-  "keywords": []
+  "devDependencies": {}
 }
