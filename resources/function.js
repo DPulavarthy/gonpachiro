@@ -1,12 +1,11 @@
 let client;
+let { writeFileSync } = require(`fs`);
 
 module.exports = {
-    startup(input) {
-        client = input;
-        let cron = require(`cron`), honkai = new cron.CronJob(`00 00 10 * * 2,6`, client.function.honkai, null, true, `America/Los_Angeles`);
-        honkai.start();
-    },
     async chart(title, data, unit) {
+        let { writeFileSync } = require(`fs`);
+        let { registerFont } = require(`canvas`)
+        registerFont(`./OpenSans-Regular.ttf`, { family: 'Open Sans' })
         let main = `#191919`, opposite = `#C0C0C0`, font = 70, old = [], follow = true, i = 1, j = 8, canvas = require(`canvas`).createCanvas(1000, 500), ctx = canvas.getContext('2d'), max = Math.max(...data);
         ctx.fillStyle = opposite;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -86,8 +85,9 @@ module.exports = {
         function type(text, width, height, format) { ctx.font = write(text, format); ctx.fillStyle = main; ctx.fillText(text, width, height); };
         function circle(x, y, size) { ctx.beginPath(); ctx.arc(x + size / 2, y + size / 2, size / 2, 0, 2 * Math.PI, false); ctx.fillStyle = client.util.id.main; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = main; ctx.stroke(); };
         function draw(startx, starty, movex, movey) { ctx.lineWidth = 2; ctx.strokeStyle = main; ctx.beginPath(); ctx.moveTo(startx, starty); ctx.lineTo(movex, movey); ctx.stroke(); };
-        function write(text, type) { do { ctx.font = `${type === font ? font - 10 : font / 3}px sans-serif`; ctx.textAlign = `center` } while (ctx.measureText(text).width > 180); return ctx.font; };
-        require(`fs`).writeFileSync('./resources/chart.png', canvas.toBuffer());
+        function write(text, type) { do { ctx.font = `${type === font ? font - 10 : font / 3}px "Open Sans"`; ctx.textAlign = `center` } while (ctx.measureText(text).width > 180); return ctx.font; };
+        writeFileSync('./data/ping.png', canvas.toBuffer());
+
     },
     reset() {
         if (client.db) {
@@ -150,17 +150,17 @@ module.exports = {
                 { type: `WATCHING`, data: `The Yae Village Alders`, },
                 { type: `PLAYING`, data: `With ${client.lines.toLocaleString()} Lines Of Code`, },
                 { type: `PLAYING`, data: `I am Darkbolt Jonin`, },
-                { type: `PLAYING`, data: `Not from Naruto™`, },
+                { type: `PLAYING`, data: `Not from Narutoï¿½`, },
                 { type: `PLAYING`, data: `I am Yae Sakura`, },
                 { type: `PLAYING`, data: `Approved by De~Yuo!`, },
                 { type: `PLAYING`, data: `jonin.gq`, },
             ];
             let rand = Math.floor(Math.random() * key.length);
             await client.user.setActivity(`${key[rand].data} | ${client.prefix}help`, { type: key[rand].type });
-        }, 10 * 1000);
+        }, 60 * 1000);
     },
     async update(reren) {
-        if (reren) { setInterval(async () => { update(); }, 3600000); } else { update(); };
+        if (reren) { setInterval(async () => { update(); }, (3600000/2)); } else { update(); };
 
         async function update() {
             const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -248,7 +248,7 @@ module.exports = {
                     let avatar = sheet.getCellByA1(`A21`);
                     avatar.value = `avatar:<img src="${client.users.cache.get(client.util.id.creator.id).avatarURL({ format: "jpeg", dynamic: true, size: 2048 })}" alt="${client.users.cache.get(client.util.id.creator.id).username}'s PFP" style="box-shadow:0 1px 1rem ${status};"/>`
                     let creator = sheet.getCellByA1(`A22`);
-                    creator.value = `creator:<a class="tooltip" href="https://discord.com/users/${client.util.id.creator.id}">${client.users.cache.get(client.util.id.creator.id).username}${label}</a>`
+                    creator.value = `creator:<a class="tooltip" href="https://discord.com/users/${client.util.id.creator.id}">${client.users.cache.get(client.util.id.creator.id).tag}${label}</a>`
                     await sheet.saveUpdatedCells();
                 })
             })
