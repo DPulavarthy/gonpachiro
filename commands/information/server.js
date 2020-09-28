@@ -1,7 +1,7 @@
 const moment = require(`moment`);
 require(`moment-duration-format`)(moment);
 
-module.exports.run = async (client, message, args, prefix) => {
+module.exports.run = async (client, message, args, guild) => {
     let r = { "brazil": ":flag_br: Brazil", "eu-central": ":flag_eu: Central Europe", "singapore": ":flag_sg: Singapore", "us-central": ":flag_us: U.S. Central", "sydney": ":flag_au: Sydney", "us-east": ":flag_us: U.S. East", "us-south": ":flag_us: U.S. South", "us-west": ":flag_us: U.S. West", "eu-west": ":flag_eu: Western Europe", "vip-us-east": ":flag_us: VIP U.S. East", "london": ":flag_gb: London", "amsterdam": ":flag_nl: Amsterdam", "hongkong": ":flag_hk: Hong Kong", "russia": ":flag_ru: Russia", "southafrica": ":flag_za:  South Africa" },
         online = await message.guild.members.cache.filter(c => c.presence.status === "online").map(c => c).length,
         idle = await message.guild.members.cache.filter(c => c.presence.status === "idle").map(c => c).length,

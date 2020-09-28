@@ -1,5 +1,3 @@
-
-
 module.exports.run = async (client, message, args) => {
     let field = [], user = await client.src.userlist(message, args), DBL = require(`dblapi.js`), dbl = new DBL(client.key.dbl, client), loading = await message.channel.send(client.src.loading());
     if (user.length < 1) { message.channel.send(client.src.comment(`That user was not found in ${message.guild.name}`)); return client.log(message); };

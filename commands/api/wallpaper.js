@@ -9,5 +9,5 @@ module.exports.code = {
     about: "A wallpaper command",
     usage: ["%P%poke (USER)"],
     alias: ["wp"],
-    nsfw: true,
+    nsfw: false,
 }
