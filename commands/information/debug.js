@@ -1,8 +1,8 @@
 module.exports.run = async (client, message) => {
     let loading = await message.channel.send(client.src.loading());
-    client.database.config.findOne({ case: `data` }, async function (error, result) {
-        if (error) { client.error(error); };
-        let developer = result.data.find(group => group.rank === 7);
+    // client.database.config.findOne({ case: `data` }, async function (error, result) {
+    //     if (error) { client.error(error); };
+    //     let developer = result.data.find(group => group.rank === 7);
         require(`systeminformation`).cpu().then(cpu => {
             require(`systeminformation`).osInfo().then(os => {
                 const embed = client.embed()
@@ -17,12 +17,12 @@ module.exports.run = async (client, message) => {
                     .addField(`Server Info`, client.src.code(os.platform), true)
                     .addField(`Cores`, client.src.code(cpu.cores), true)
                     .addField(`Last Updated`, client.readyAt.toDateString(), true)
-                    .addField(`Maintainers and developers`, developer.data.map(id => `\`${client.users.cache.get(id).username}\``).join(", "), true)
+                    // .addField(`Maintainers and developers`, developer.data.map(id => `\`${client.users.cache.get(id).username}\``).join(", "), true)
                 setTimeout(async () => { loading.edit(embed); }, 1000);
                 return client.log(message);
             })
         })
-    })
+    // })
 }
 
 function formatBytes(bytes) {

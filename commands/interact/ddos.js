@@ -1,4 +1,4 @@
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (client, message, args, prefix) => {
     if (!args.join(` `)) { return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); }
     let user = await client.src.userlist(message, args);
     if (user.length < 1) { message.channel.send(client.src.comment(`That user was not found in ${message.guild.name}**`)); return client.log(message); };

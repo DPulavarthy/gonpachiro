@@ -1,4 +1,4 @@
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (client, message, args, prefix) => {
     if (!args.join("") || (args[0].toLowerCase() != `c` && args[0].toLowerCase() != `f` && args[0].toLowerCase() != `k`) || !args[1]) { return client.src.invalid(message, module.exports.code.usage[0], module.exports.code.about, null, prefix); };
     let original = parseInt(args[1]);
     if (!original || isNaN(original)) { message.channel.send(client.src.comment(`Must enter an integer`)); return client.log(message); }

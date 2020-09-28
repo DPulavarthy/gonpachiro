@@ -7,26 +7,26 @@ module.exports = {
         client.util = require(`./util.js`);
         client.function = require(`./function.js`);
         client.function.startup(client);
-        client.function.ping();
+        // client.function.ping();
         client.function.status();
-        client.function.update(true);
-        client.function.database(input[1]);
-        client.chart = client.function.chart;
+        // client.function.update(true);
+        // client.function.database(input[1]);
+        // client.chart = client.function.chart;
         client.prefix = process.env.PREFIX;
         client.token = process.env.TOKEN;
         client.embed = client.src.embed;
         client.error = client.src.error;
         client.log = client.src.log;
         client.emoji = client.util.emoji;
-        client.key = client.util.key;
         client.arrow = client.emojis.cache.get(client.emoji.arrow).toString();
         client.blank = client.emojis.cache.get(client.emoji.blank).toString();
-        let Statcord = require(`statcord.js`)
-        client.statcord = new Statcord.Client(client.key.statcord, client);
-        client.bin = async (data) => { let res = await require(`superagent`).post(`https://paste.marksbot.mwserver.site/pastebin/api`).set(`Authorization`, client.key.bin).set(`User-Agent`, `Pastebin services`).send({ content: data }); if (res.status !== 200) return `[${res.status}]: Pastebin error`; if (res.body.status !== `Success`) return `Pastebin error`; return res.body.url; };
-        let cron = require(`cron`), reset = new cron.CronJob(`* * 0 * * *`, client.function.reset, null, true, `America/Chicago`), gacha = new cron.CronJob(`* * 0 * * 0`, client.function.gacha, null, true, `America/Chicago`), initalPost = await client.statcord.autopost();
-        reset.start(); gacha.start(); client.function.key();
-        if (initalPost) { client.error(initalPost); process.exit(); };
+        // let Statcord = require(`statcord.js`)
+        // client.statcord = new Statcord.Client(client.key.statcord, client);
+        // client.bin = async (data) => { let res = await require(`superagent`).post(`https://paste.marksbot.mwserver.site/pastebin/api`).set(`Authorization`, client.key.bin).set(`User-Agent`, `Pastebin services`).send({ content: data }); if (res.status !== 200) return `[${res.status}]: Pastebin error`; if (res.body.status !== `Success`) return `Pastebin error`; return res.body.url; };
+        // let cron = require(`cron`), reset = new cron.CronJob(`* * 0 * * *`, client.function.reset, null, true, `America/Chicago`), gacha = new cron.CronJob(`* * 0 * * 0`, client.function.gacha, null, true, `America/Chicago`), initalPost = await client.statcord.autopost();
+        // reset.start(); gacha.start(); 
+        // client.function.key();
+        // if (initalPost) { client.error(initalPost); process.exit(); };
         console.log(`${`[PROGRM]: ${client.user.tag} Connection Successful!`.yellow}`);
     },
     error(input) { console.log(`${`[ERROR!]: ${input}`.red}`); },
@@ -35,7 +35,7 @@ module.exports = {
     async getUser(members, input) { return input ? await members.find(member => member.user.tag.toLowerCase().includes(input.toLowerCase())) || false : false; },
     async getRole(roles, input) { return input ? await roles.find(role => role.name.toLowerCase().includes(input.toLowerCase())) || false : false; },
     async getEmoji(emojis, args) { return args ? emojis.find(emoji => emoji.id === args.toLowerCase()) : false; },
-    async db(message, input, info, remove, collection) { collection = collection || client.database.data; if (remove) { collection.deleteOne({ case: input }, function (error) { if (error) { client.src.error(error); }; }); } else { collection.insertOne({ case: input, data: info || [] }, function (error) { if (error) { client.src.error(error); }; if (message) { message.channel.send(client.src.comment(`A document with case \'${input}\' has been created.\nRerun the command!`)) } }); }; },
+    async db(message, input, info, remove, collection) { return; collection = collection || client.database.data; if (remove) { collection.deleteOne({ case: input }, function (error) { if (error) { client.src.error(error); }; }); } else { collection.insertOne({ case: input, data: info || [] }, function (error) { if (error) { client.src.error(error); }; if (message) { message.channel.send(client.src.comment(`A document with case \'${input}\' has been created.\nRerun the command!`)) } }); }; },
     async userlist(message, args) {
         let user = [];
         if (!args.join(` `)) { return [client.users.cache.get(message.author.id)]; };
@@ -107,35 +107,35 @@ module.exports = {
         let data = info ? clean(info) : ``, log = `\`${clean(message.author.username)}\` sent: \`${clean(message.content)}\` ${message.channel.type === `dm` ? `in \`DMs\`` : `in channel \`${clean(message.channel.name)}\` of guild \`${clean(message.guild.name)}\``}`;
         console.log(`${`[INFORM]: ${log}`.brightMagenta}`);
         log += data && data !== `hiro` ? `\`[${data}]\` \` TIN: ${message.author.id} \`` : ` \` TIN: ${message.author.id} \``;
-        client.database.config.findOne({ case: `logs` }, async function (error, result) {
-            if (error) { client.error(error); };
-            if (!result) { result = await client.src.db(message, `logs`, null, null, client.database.config); };
-            if (result.data.length >= 5) { result.data.shift(); };
-            result.data.push(log);
-            let res = { $set: { data: result.data } };
-            client.database.config.updateOne({ case: `logs` }, res, function (error) { if (error) { client.src.error(error); } });
-            if (data === `hiro`) { log = client.src.code(log, `fix`); };
-            client.channels.cache.get(client.util.id.log).send(log);
-            if (message.channel.type !== `dm`) {
-                client.database.guilds.findOne({ id: message.guild.id }, async function (error, result) {
-                    if (error) { client.error(error); };
-                    if (!result) return;
-                    result.count++;
-                    let res = { $set: { count: result.count } };
-                    client.database.guilds.updateOne({ id: message.guild.id }, res, function (error) { if (error) { client.src.error(error); } });
-                })
-            }
-            let args = message.content.slice(client.prefix.length).trim().split(/ +/g);
-            args.shift().toLowerCase();
-            let array = message.content.split(` `), cmd = array[0].toLowerCase(), command = client.commands.get(cmd.slice(client.prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(client.prefix.length)));
-            client.database.commands.findOne({ case: command.code.title }, async function (error, result) {
-                if (error) { client.error(error); };
-                if (!result) { return client.src.db(null, command.code.title, 1, null, client.database.commands); };
-                result.data++;
-                let res = { $set: { data: result.data } };
-                client.database.commands.updateOne({ case: command.code.title }, res, function (error) { if (error) { client.src.error(error); } });
-            })
-        })
+        // client.database.config.findOne({ case: `logs` }, async function (error, result) {
+        //     if (error) { client.error(error); };
+        //     if (!result) { result = await client.src.db(message, `logs`, null, null, client.database.config); };
+        //     if (result.data.length >= 5) { result.data.shift(); };
+        //     result.data.push(log);
+        //     let res = { $set: { data: result.data } };
+        //     client.database.config.updateOne({ case: `logs` }, res, function (error) { if (error) { client.src.error(error); } });
+        //     if (data === `hiro`) { log = client.src.code(log, `fix`); };
+        //     client.channels.cache.get(client.util.id.log).send(log);
+        //     if (message.channel.type !== `dm`) {
+        //         client.database.guilds.findOne({ id: message.guild.id }, async function (error, result) {
+        //             if (error) { client.error(error); };
+        //             if (!result) return;
+        //             result.count++;
+        //             let res = { $set: { count: result.count } };
+        //             client.database.guilds.updateOne({ id: message.guild.id }, res, function (error) { if (error) { client.src.error(error); } });
+        //         })
+        //     }
+        //     let args = message.content.slice(client.prefix.length).trim().split(/ +/g);
+        //     args.shift().toLowerCase();
+        //     let array = message.content.split(` `), cmd = array[0].toLowerCase(), command = client.commands.get(cmd.slice(client.prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(client.prefix.length)));
+        //     client.database.commands.findOne({ case: command.code.title }, async function (error, result) {
+        //         if (error) { client.error(error); };
+        //         if (!result) { return client.src.db(null, command.code.title, 1, null, client.database.commands); };
+        //         result.data++;
+        //         let res = { $set: { data: result.data } };
+        //         client.database.commands.updateOne({ case: command.code.title }, res, function (error) { if (error) { client.src.error(error); } });
+        //     })
+        // })
         function clean(input) { return input.replace(/`|"/g, `\'`); };
     },
     status(simple) {

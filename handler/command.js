@@ -12,7 +12,7 @@ module.exports = async (client) => { // Command Handler
             let pull = require(`../commands/${dir}/${file}`);
             require(`fs`).readFile(`./commands/${dir}/${file}`, `utf8`, function (error, code) { if (error) { client.error(error); } length += code.length; lines += countlines(code); });
             if (pull.code && pull.code.title) {
-                client.cooldowns.set(pull.code.title, new Discord.Collection());
+                // client.cooldowns.set(pull.code.title, new Discord.Collection());
                 client.commands.set(pull.code.title, { run: pull.run, code: pull.code, group: dir });
                 if (pull.code.alias && pull.code.alias.length > 0) { pull.code.alias.forEach(alias => { client.aliases.set(alias, pull.code.title); }); };
                 count++; approved++;

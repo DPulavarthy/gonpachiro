@@ -10,8 +10,8 @@ module.exports.run = async (client, message, args, guild) => {
         offline = await message.guild.members.cache.filter(c => c.presence.status === "offline").map(c => c).length,
         field = [];
 
-    client.database.guilds.findOne({ id: message.guild.id }, async function (error, result) {
-        if (error) { client.error(error); };
+    // client.database.guilds.findOne({ id: message.guild.id }, async function (error, result) {
+        // if (error) { client.error(error); };
         field.push(`${client.arrow} Name: ${message.guild.name}`);
         field.push(`${client.arrow} ID: ${message.guild.id}`);
         field.push(`${client.arrow} Region: ${r[message.guild.region]}`);
@@ -30,17 +30,17 @@ module.exports.run = async (client, message, args, guild) => {
         field.push(`${client.blank} ${client.emojis.cache.get(client.util.emoji.red).toString()}DND: ${dnd}`);
         field.push(`${client.blank} ${client.emojis.cache.get(client.util.emoji.purple).toString()}Streaming: ${streaming}`);
         field.push(`${client.blank} ${client.emojis.cache.get(client.util.emoji.grey).toString()}Offline: ${offline}`);
-        if (result) {
-            field.push(`${client.arrow} Data stats`);
-            field.push(`${client.blank} Nitro Mock-up: ${result.nitro ? `Enabled` : `Disabled`}`);
-            let channel = message.guild.channels.cache.get(result.log);
-            field.push(`${client.blank} Log Channel: ${channel ? channel.toString() : `ERROR, Log channel not found`}`);
-            field.push(`${client.blank} Server Prefix: ${result.prefix !== client.prefix ? result.prefix : `Default`}`);
-            field.push(`${client.blank} Command usage count: ${result.count.toLocaleString()}`);
-            field.push(`${client.blank} Game Badges count: ${result.badges.length.toLocaleString()}`);
-            field.push(`${client.blank} Attacked guilds count: ${result.attacked.length.toLocaleString()}`);
-            field.push(`${client.blank} Valks count: ${result.data.length.toLocaleString()}`);
-        }
+        // if (result) {
+        //     field.push(`${client.arrow} Data stats`);
+        //     field.push(`${client.blank} Nitro Mock-up: ${result.nitro ? `Enabled` : `Disabled`}`);
+        //     let channel = message.guild.channels.cache.get(result.log);
+        //     field.push(`${client.blank} Log Channel: ${channel ? channel.toString() : `ERROR, Log channel not found`}`);
+        //     field.push(`${client.blank} Server Prefix: ${result.prefix !== client.prefix ? result.prefix : `Default`}`);
+        //     field.push(`${client.blank} Command usage count: ${result.count.toLocaleString()}`);
+        //     field.push(`${client.blank} Game Badges count: ${result.badges.length.toLocaleString()}`);
+        //     field.push(`${client.blank} Attacked guilds count: ${result.attacked.length.toLocaleString()}`);
+        //     field.push(`${client.blank} Valks count: ${result.data.length.toLocaleString()}`);
+        // }
         field.push(`${client.arrow} Server created: ${moment.duration(new Date().getTime() - new Date(message.guild.createdAt).getTime()).format(`w [Weeks], d [Days], h [Hours], m [Minutes] ago`)}`);
 
         const embed = client.embed()
@@ -49,7 +49,7 @@ module.exports.run = async (client, message, args, guild) => {
             .setThumbnail(message.guild.iconURL({ format: "png", dynamic: true, size: 2048 }));
         await message.channel.send(embed);
         return client.log(message);
-    })
+    // })
 }
 
 module.exports.code = {
