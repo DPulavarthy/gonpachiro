@@ -1,39 +1,44 @@
 {
-  "name": "jonin",
-  "version": "3.00.00",
-  "description": "A multi-purpose bot for a shrine maiden at Yae Village",
-  "main": "jonin.js",
-  "scripts": {
-    "start": "node jonin.js"
-  },
-  "author": "[HV]Kurasad#2521",
-  "license": "ISC",
+  "name": "bronya",
+  "version": "1.0.0",
+  "description": "Kurasad's Discord Bot",
+  "main": "bronya.js",
   "dependencies": {
-    "@discordjs/opus": "^0.1.0",
-    "bad-words": "^3.0.3",
+    "@2toad/profanity": "^1.1.0",
+    "canvas": "^2.6.1",
+    "cleverbot-free": "^1.0.4",
+    "colors": "^1.4.0",
     "country-code-lookup": "0.0.17",
     "danbooru": "^3.1.0",
-    "dbl-api": "^1.2.1",
-    "dblapi.js": "^2.4.0",
-    "discord.js": "^12.2.0",
-    "fs": "0.0.1-security",
-    "imdb-api": "^4.0.3",
-    "moment": "^2.24.0",
+    "decode-encode-binary": "^1.4.14",
+    "discord.js": "^12.3.1",
+    "dotenv": "^8.2.0",
+    "elara-services": "^1.2.9",
+    "google-translate-free": "^2.4.5",
+    "millify": "^3.3.0",
+    "moment": "^2.29.0",
     "moment-duration-format": "^2.3.2",
-    "ms": "^2.1.2",
-    "nekos.life": "^2.0.6",
-    "nicejob": "^1.0.1",
+    "mongodb": "^3.6.2",
+    "node-fetch": "^2.6.1",
     "node-osu": "^2.2.0",
-    "owoify-js": "^1.0.7",
-    "pokedex": "^1.1.0",
-    "simple-youtube-api": "^5.2.1",
-    "string-similarity-js": "^2.1.2",
-    "superagent": "^5.2.2",
+    "sloc": "^0.2.1",
+    "systeminformation": "^4.27.5",
     "urban": "^0.3.2",
-    "weather-js": "^2.0.0",
-    "ytdl-core": "^2.1.0",
-    "ytdl-core-discord": "^1.2.0"
+    "weather-js": "^2.0.0"
   },
   "devDependencies": {},
-  "keywords": []
+  "scripts": {
+    "test": "bronya?"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DPulavarthy/bronya.git",
+    "src": "https://github.com/DPulavarthy/bronya"
+  },
+  "author": "Kurasad#2521",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DPulavarthy/bronya/issues"
+  },
+  "homepage": "https://github.com/DPulavarthy/bronya#readme"
 }

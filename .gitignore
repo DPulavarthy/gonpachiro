@@ -1,5 +1,6 @@
-node_modules
-local_commands
-resources
-config.json
-util.js
+# Files
+.env
+package-lock.json
+
+# Folders
+/node_modules
