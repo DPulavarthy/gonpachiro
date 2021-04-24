@@ -1,35 +1,36 @@
-module.exports = async (client, time) => {
-    let { MongoClient } = require(`mongodb`)
-    let database = new MongoClient(process.env.DB_URL, { useUnifiedTopology: true })
-    database.connect(async error => {
+let [{ MongoClient }, { timeify }] = [require(`mongodb`), require(`./src.js`)]
+
+module.exports = (client, time) => {
+    let database = new MongoClient(process.decode(process.env.MONGODB_CONNECTION_STRING).data, { useUnifiedTopology: true })
+    database.connect(error => {
         if (error) {
-            console.log(`[ERROR!]: [-----] ${error}`.errors)
+            console.log(`[ERROR!]: ${timeify()} ${error}`)
             client.destroy()
-            return database.close()
+            database.close()
+            return process.exit(1)
         }
-        client.db = database.db(`bronya`)
-        client.db.listCollections().toArray(async (error, collections) => {
-            if (error) console.log(`[ERROR!]: [-----] ${error}`.errors)
+        client.db = database.db(process.decode(process.env.MONGODB_CONNECTION_TITLE).data)
+        client.db.listCollections().toArray((error, collections) => {
+            if (error) console.log(`[ERROR!]: ${timeify()} ${error}`)
             if (collections.length < 1) {
-                console.log(`[ERROR!]: [-----] Required Database not found!`.errors)
+                console.log(`[ERROR!]: ${timeify()} Required Database not found!`)
                 client.destroy()
-                return database.close()
+                database.close()
+                return process.exit(1)
             }
-            let [exists, required] = [[], [`data`, `guilds`]]
-            collections.forEach(collection => exists.push(collection.name))
-            for await (let collection of required) {
-                if (!exists.includes(collection)) {
-                    console.log(`[ISSUE!]: [-----] Collection [${collection}] was not found`.yellow)
-                    await client.db.createCollection(collection, async (error) => {
-                        if (error) console.log(`[ERROR!]: [-----] Collection [${collection}] failed to create: ${error}`.errors)
-                        else console.log(`[PASSED]: [-----] Collection [${collection}] was successfully created`.yellow)
+            let [required, exists] = [[`guilds`], collections.map(coll => coll.name)]
+            for (let require of required) {
+                if (!exists.includes(require)) {
+                    console.log(`[ISSUE!]: ${timeify()} Collection [${require}] was not found`)
+                    client.db.createCollection(require, error => {
+                        if (error) console.log(`[ERROR!]: ${timeify()} Collection [${require}] failed to create: ${error}`)
+                        else console.log(`[PASSED]: ${timeify()} Collection [${require}] was successfully created`)
                     })
                 }
             }
+            collections.forEach(collection => client.db[`_${collection.name}`] = client.db.collection(collection.name))
         })
-        client.db._data = client.db.collection(`data`)
-        client.db._guilds = client.db.collection(`guilds`)
-        console.log(`[PROGRM]: ${require(`./src.js`).time(time)} Database Connection Successful!`.yellow)
+        client.db._guildAdd = require(`./src.js`)._guildAdd
+        console.log(`[PROGRM]: ${timeify(time)} Database Connection Successful!`)
     })
-
 }

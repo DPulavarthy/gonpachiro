@@ -1,44 +1,28 @@
 {
-  "name": "bronya",
-  "version": "1.0.0",
-  "description": "Kurasad's Discord Bot",
-  "main": "bronya.js",
-  "dependencies": {
-    "@2toad/profanity": "^1.1.0",
-    "canvas": "^2.6.1",
-    "cleverbot-free": "^1.0.4",
-    "colors": "^1.4.0",
-    "country-code-lookup": "0.0.17",
-    "danbooru": "^3.1.0",
-    "decode-encode-binary": "^1.4.14",
-    "discord.js": "^12.3.1",
-    "dotenv": "^8.2.0",
-    "elara-services": "^1.2.9",
-    "google-translate-free": "^2.4.5",
-    "millify": "^3.3.0",
-    "moment": "^2.29.0",
-    "moment-duration-format": "^2.3.2",
-    "mongodb": "^3.6.2",
-    "node-fetch": "^2.6.1",
-    "node-osu": "^2.2.0",
-    "sloc": "^0.2.1",
-    "systeminformation": "^4.27.5",
-    "urban": "^0.3.2",
-    "weather-js": "^2.0.0"
-  },
-  "devDependencies": {},
+  "name": "jonin",
+  "version": "5.0.0",
+  "description": "A Discord Bot",
+  "main": "jonin.js",
   "scripts": {
-    "test": "bronya?"
+    "dev": "nodemon jonin.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DPulavarthy/bronya.git",
-    "src": "https://github.com/DPulavarthy/bronya"
+    "url": "git+https://github.com/DPulavarthy/zhongli.git"
   },
   "author": "Kurasad#2521",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/DPulavarthy/bronya/issues"
-  },
-  "homepage": "https://github.com/DPulavarthy/bronya#readme"
+  "dependencies": {
+    "@discordjs/opus": "^0.3.3",
+    "canvas": "^2.6.1",
+    "discord-music-player": "^6.3.5",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "endecodify": "^1.0.1",
+    "mongodb": "^3.6.3",
+    "nodemon": "^2.0.6",
+    "opusscript": "0.0.7",
+    "sloc-count": "0.0.5",
+    "ytpl": "^2.0.4"
+  }
 }

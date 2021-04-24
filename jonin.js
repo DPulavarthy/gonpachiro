@@ -1,0 +1,10 @@
+let time = new Date().getTime()
+require(`./res/pre.js`).start()
+let client = process.__client()
+for (let id of [`cmd`, `db`]) require(`./res/${id}.js`)(client, time)
+client
+    .on(`ready`, () => require(`./res/src.js`).startup(client, time))
+    .on(`message`, messageify => require(`./res/msg.js`)(messageify))
+    .on(`guildCreate`, guild => client.src._guild({ create: guild }))
+    .on(`guildDelete`, guild => client.src._guild({ delete: guild }))
+    .login(process.decode(process.env.DISCORD_BOT_CLIENT_TOKEN).data)
